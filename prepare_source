@@ -20,3 +20,5 @@ for file in ${FILES}; do
     curl -L "${BASE_URL}/${DIRECTORY}/${file}" | xz -d | tee "$dir/debian.tar" | tar xf - --directory "$dir/src"
   fi
 done
+
+apply_patches fixes_debian

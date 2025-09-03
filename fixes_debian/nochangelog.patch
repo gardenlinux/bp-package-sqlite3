@@ -1,0 +1,23 @@
+diff --color -Naur a/debian/rules b/debian/rules
+--- a/debian/rules	2025-05-24 15:36:17.000000000 +0200
++++ b/debian/rules	2025-09-03 11:47:54.789212956 +0200
+@@ -160,9 +160,6 @@
+ 
+ 	dh_install -i --sourcedir=$(DESTDIR)
+ 	dh_installdocs -i
+-	lynx -dump -nolist www/changes.html >changelog
+-	dh_installchangelogs -i www/changes.html changelog
+-	rm changelog
+ 	dh_compress -i
+ 	dh_fixperms -i
+ 	dh_installdeb -i
+@@ -177,9 +174,6 @@
+ 	dh_install -a --sourcedir=$(DESTDIR)
+ 	dh_installman -a
+ 	dh_installdocs -a
+-	lynx -dump -nolist www/changes.html >changelog
+-	dh_installchangelogs -a www/changes.html changelog
+-	rm changelog
+ 	dh_strip -a
+ 	dh_compress -a
+ 	dh_fixperms -a
