@@ -1,6 +1,6 @@
 snapshot_timestamp=1754316590
 pkg=sqlite3
-version_suffix="gl0+bp1877"
+version_suffix="gl0+bp1592"
 BASE_URL=https://packages.gardenlinux.io
 
 apt-get install --no-install-recommends -y curl gzip ca-certificates
