@@ -1,24 +1,12 @@
-snapshot_timestamp=1773130228
 pkg=sqlite3
-version_suffix="gl0+bp1877"
-BASE_URL=https://packages.gardenlinux.io
+version_orig=3.53.4
+version="${version_orig}-2"
+version_suffix="gl0+bp2150"
 
-apt-get install --no-install-recommends -y curl gzip ca-certificates
-curl -sSL ${BASE_URL}/debian-snapshot/dists/${snapshot_timestamp}/main/source/Sources.gz | gunzip >Sources
+snapshot_gl_version="2300" # Start searching from this GL nightly version and search forward 100 versions
+snapshot=$(pkg_version_in_gl_version "$pkg" "$version" "$snapshot_gl_version" 100)
 
-DIRECTORY=$(grep -A100 "Package: $pkg" Sources | grep Directory | head -1 | cut -d' ' -f2)
-# reverse sort so that "orig" comes first
-FILES=$(grep -A100 "Package: $pkg" Sources | grep Files: -A100 | grep " ${pkg}_" | grep -E '\.(orig|debian)\.' | cut -d' ' -f4 | sort -ur)
-
-mkdir -p "$dir/src"
-
-for file in ${FILES}; do
-  if echo ${file} | grep '\.orig\.'; then
-    # TODO: check compression format
-    curl -L "${BASE_URL}/${DIRECTORY}/${file}" | xz -d | tee "$dir/orig.tar" | tar xf - --strip-components 1 --directory "$dir/src"
-  elif echo ${file} | grep '\.debian\.'; then
-    curl -L "${BASE_URL}/${DIRECTORY}/${file}" | xz -d | tee "$dir/debian.tar" | tar xf - --directory "$dir/src"
-  fi
-done
+# Get sources from snapshot
+snapshot_src "$pkg" "$snapshot"
 
 apply_patches fixes_debian
