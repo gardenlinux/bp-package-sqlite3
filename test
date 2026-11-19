@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+script_dir="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+
+arch="${1:-$(dpkg --print-architecture)}"
+
+container=ghcr.io/gardenlinux/repo-debian-snapshot
+if [ -e "$script_dir/.container" ]; then
+	container="$(cat "$script_dir/.container")"
+fi
+
+# Read the upstream version from prepare_source
+source <(grep '^version_orig=' "$script_dir/prepare_source")
+
+# TEMPORARY FIX for https://github.com/actions/runner-images/issues/14473
+OCI_RUNTIME=$(command -v crun || true)
+
+podman ${OCI_RUNTIME:+--runtime "$OCI_RUNTIME"} run \
+	--security-opt seccomp=unconfined \
+	--arch "$arch" \
+	--rm \
+	-i \
+	-v "$script_dir/.build:/build:ro,Z" \
+	"$container" \
+	/bin/bash -euxo pipefail /dev/stdin << CONTAINEREOF
+
+arch="\$(dpkg --print-architecture)"
+
+# Install the freshly built packages from the bind-mounted .build directory
+apt-get install --no-install-recommends -y \
+	/build/sqlite3_${version_orig}*_"\${arch}".deb \
+	/build/libsqlite3-0_${version_orig}*_"\${arch}".deb \
+	/build/libsqlite3-dev_${version_orig}*_"\${arch}".deb
+
+# Install build dependencies needed to compile testfixture and run the test suite
+apt-get install --no-install-recommends -y \
+	build-essential \
+	tcl8.6-dev \
+	tcl8.6
+
+workdir="\$(mktemp -d)"
+trap 'rm -rf "\$workdir"' EXIT
+
+tar xf /build/sqlite3_${version_orig}.orig.tar.xz --strip-components=1 -C "\$workdir"
+cd "\$workdir"
+
+./configure --with-tclsh=/usr/bin/tclsh8.6
+chown -R user:users "\$workdir"
+su -s /bin/sh user -c "
+  cd '\$workdir'
+  make testfixture
+
+  # Replace the just-compiled sqlite3 CLI with the installed package binary so
+  # that testrunner uses the package under test for all shell-based tests
+  ln -sf /usr/bin/sqlite3 sqlite3
+
+  # tcltest runs veryquick.test directly under testfixture (which embeds sqlite3),
+  # avoiding the system tclsh dependency and completing in minutes
+  make tcltest
+"
+
+CONTAINEREOF

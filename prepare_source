@@ -1,11 +1,11 @@
 pkg=sqlite3
 version_orig=3.54.1
 version="${version_orig}-2"
-version_suffix="gl0+bp2150"
+version_suffix="gl1+bp2150"
 
 echo "deb-src https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/testing.list                                                  
 apt-get update
 
 apt_src ${pkg}=${version}
 import_upstream_patches upstream_patches
-#apply_patches fixes_debian
+apply_patches fixes_debian

@@ -1,0 +1,59 @@
+--- a/debian/rules
++++ b/debian/rules
+@@ -26,7 +26,7 @@
+ export DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+ 
+ TCLV_PRIMARY = 8.6
+-TCLV_SECONDARY = 9.1
++
+ 
+ export LDFLAGS += -Wl,--as-needed
+ ifeq ($(DEB_BUILD_GNU_TYPE), $(DEB_HOST_GNU_TYPE))
+@@ -68,7 +68,7 @@
+ configure: configure-stamp
+ configure-stamp:
+ 	dh_testdir
+-	for v in $(TCLV_PRIMARY) $(TCLV_SECONDARY) ; do \
++	for v in $(TCLV_PRIMARY) ; do \
+ 		mkdir -p $(CURDIR)/debian/$$v && \
+ 		cd $(CURDIR)/debian/$$v && \
+ 		../../configure \
+@@ -99,7 +99,7 @@
+ build: build-arch build-indep
+ build-stamp: configure
+ 	dh_testdir
+-	for v in $(TCLV_PRIMARY) $(TCLV_SECONDARY) ; do \
++	for v in $(TCLV_PRIMARY) ; do \
+ 	  $(MAKE) -C$(CURDIR)/debian/$$v ; \
+ 	done
+ 	$(MAKE) -C$(CURDIR)/debian/$(TCLV_PRIMARY) lemon
+@@ -118,7 +118,7 @@
+ clean:
+ 	dh_testdir
+ 	dh_testroot
+-	for v in $(TCLV_PRIMARY) $(TCLV_SECONDARY) ; do \
++	for v in $(TCLV_PRIMARY) ; do \
+ 		$(RM) -rf $(CURDIR)/debian/$$v ; \
+ 	done
+ 	$(RM) -f configure-stamp build-stamp
+@@ -133,7 +133,6 @@
+ 	dh_testroot
+ 
+ 	$(MAKE) -C$(CURDIR)/debian/$(TCLV_PRIMARY) install DESTDIR=$(DESTDIR)
+-	$(MAKE) -C$(CURDIR)/debian/$(TCLV_SECONDARY) install-tcl DESTDIR=$(DESTDIR)
+ 	chrpath -d $(DESTDIR)/usr/bin/sqlite3
+ 	chrpath -d $(DESTDIR)/usr/lib/tcltk/$(DEB_HOST_MULTIARCH)/sqlite3/lib*.so
+ 	install -d $(DESTDIR)/usr/share/lemon
+@@ -155,11 +154,7 @@
+ ifeq ($(DEB_BUILD_GNU_TYPE), $(DEB_HOST_GNU_TYPE))
+ 	PKGINDEX="$(DESTDIR)/usr/lib/tcltk/$(DEB_HOST_MULTIARCH)/sqlite3/pkgIndex.tcl" ; \
+ 	VER=$$(cat VERSION) ; \
+-	echo "if {[package vsatisfies [package provide Tcl] 9]} {" > $$PKGINDEX ; \
+-	echo "    package ifneeded sqlite3 $$VER [list load [file join \$$dir libtcl9sqlite$$VER.so] Sqlite3]" >> $$PKGINDEX ; \
+-	echo "} {" >> $$PKGINDEX ; \
+-	echo "    package ifneeded sqlite3 $$VER [list load [file join \$$dir libsqlite$$VER.so] Sqlite3]" >> $$PKGINDEX ; \
+-	echo "}" >> $$PKGINDEX
++	echo "package ifneeded sqlite3 $$VER [list load [file join \$$dir libsqlite$$VER.so] Sqlite3]" > $$PKGINDEX
+ else
+ 	echo "" > $(DESTDIR)/usr/lib/tcltk/$(DEB_HOST_MULTIARCH)/sqlite3/pkgIndex.tcl
+ endif

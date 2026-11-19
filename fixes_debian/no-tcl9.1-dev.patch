@@ -1,0 +1,11 @@
+--- a/debian/control
++++ b/debian/control
+@@ -3,7 +3,7 @@
+ Section: devel
+ Priority: optional
+ Maintainer: Laszlo Boszormenyi (GCS) <gcs@debian.org>
+-Build-Depends: debhelper-compat (= 13), autoconf, libtool, automake, pkgconf, chrpath, lynx, libreadline-dev, tcl8.6-dev, tcl9.1-dev, libtommath-dev, libicu-dev
++Build-Depends: debhelper-compat (= 13), autoconf, libtool, automake, pkgconf, chrpath, lynx, libreadline-dev, tcl8.6-dev, libtommath-dev, libicu-dev
+ Build-Conflicts: tcl8.4, tcl8.4-dev, tcl8.5, tcl8.5-dev
+ Standards-Version: 4.7.2
+ Homepage: https://www.sqlite.org/
