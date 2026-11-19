@@ -1,12 +1,11 @@
 pkg=sqlite3
-version_orig=3.53.4
+version_orig=3.54.1
 version="${version_orig}-2"
 version_suffix="gl0+bp2150"
 
-snapshot_gl_version="2300" # Start searching from this GL nightly version and search forward 100 versions
-snapshot=$(pkg_version_in_gl_version "$pkg" "$version" "$snapshot_gl_version" 100)
+echo "deb-src https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/testing.list                                                  
+apt-get update
 
-# Get sources from snapshot
-snapshot_src "$pkg" "$snapshot"
-
-apply_patches fixes_debian
+apt_src ${pkg}=${version}
+import_upstream_patches upstream_patches
+#apply_patches fixes_debian
